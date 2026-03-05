@@ -9,48 +9,53 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&family=Lora:ital,wght@0,600;0,700;1,400&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
+  --bg: #0f0f0f;
+  --white: #1a1a1a;
+  --surface: #1a1a1a;
+  --surface2: #222222;
+  --border: #2e2e2e;
+  --border2: #3a3a3a;
+  --text: #f0ede8;
+  --muted: #888880;
+  --text2: #aaa89e;
+  --soft: #141414;
+  --rose: #e8705a;
+  --rose-soft: rgba(232,112,90,0.15);
+  --green: #5ab87a;
+  --green-soft: rgba(90,184,122,0.15);
+  --green-border: rgba(90,184,122,0.25);
+  --p1: #f87171; --p1bg: #2a1010;
+  --p2: #fb923c; --p2bg: #2a1808;
+  --p3: #fbbf24; --p3bg: #2a2008;
+  --p4: #94a3b8; --p4bg: #1e1e1e;
+  --r: 14px;
+  --shadow: 0 2px 16px rgba(0,0,0,0.6);
+}
+[data-theme="light"] {
   --bg: #f7f4f0;
   --white: #ffffff;
+  --surface: #ffffff;
+  --surface2: #f0ede8;
   --border: #e8e2d9;
+  --border2: #d8d0c8;
   --text: #1c1917;
   --muted: #9c948a;
+  --text2: #7a6e66;
   --soft: #f2ede7;
   --rose: #d4614a;
-  --rose-soft: #fdf1ee;
+  --rose-soft: rgba(212,97,74,0.1);
   --green: #3d8c5e;
-  --green-soft: #edf7f1;
+  --green-soft: rgba(61,140,94,0.1);
+  --green-border: rgba(61,140,94,0.2);
   --p1: #dc2626; --p1bg: #fef2f2;
   --p2: #ea580c; --p2bg: #fff7ed;
   --p3: #ca8a04; --p3bg: #fefce8;
   --p4: #6b7280; --p4bg: #f9fafb;
-  --r: 14px;
   --shadow: 0 2px 16px rgba(0,0,0,0.07);
-}
-[data-theme="light"] {
-  --bg: #f7f4f0;
-  --surface: #ffffff;
-  --surface2: #f0ede8;
-  --border: #e5e0da;
-  --border2: #d8d0c8;
-  --soft: #f7f4f0;
-  --text: #1a1410;
-  --muted: #b0a89e;
-  --text2: #7a6e66;
-  --white: #ffffff;
-  --rose: #c85a42;
-  --rose-soft: rgba(200,90,66,0.08);
-  --green: #2d7a50;
-  --green-soft: rgba(45,122,80,0.08);
-  --green-border: rgba(45,122,80,0.18);
-  --p1: #dc2626; --p1bg: #fff0f0;
-  --p2: #ea580c; --p2bg: #fff5f0;
-  --p3: #b45309; --p3bg: #fffbf0;
-  --p4: #6b7280; --p4bg: #f5f5f5;
-  --shadow: 0 2px 12px rgba(0,0,0,0.08);
 }
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 html { scroll-behavior: smooth; }
-body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 80px; }
+body { transition: background 0.3s, color 0.3s; font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 80px; }
 
 /* \u2500\u2500 NAV \u2500\u2500 */
 .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--white); border-top: 1px solid var(--border); display: flex; z-index: 200; }
@@ -86,7 +91,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .btn-dark { background: var(--text); color: white; }
 .btn-dark:active { transform: scale(0.97); }
 .btn-rose { background: var(--rose); color: white; }
-.btn-ghost { background: transparent; border: 1.5px solid var(--border); color: #666; font-size: 13px; padding: 8px 14px; }
+.btn-ghost { background: transparent; border: 1.5px solid var(--border); color: var(--muted); font-size: 13px; padding: 8px 14px; }
 .btn-ghost:active { background: var(--border); }
 
 /* \u2500\u2500 FAB \u2500\u2500 */
@@ -130,8 +135,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 
 .filter-row { display: flex; gap: 6px; overflow-x: auto; padding: 2px 0 10px; scrollbar-width: none; }
 .filter-row::-webkit-scrollbar { display: none; }
-.chip { white-space: nowrap; padding: 6px 13px; border-radius: 99px; font-size: 12px; font-weight: 500; border: 1.5px solid var(--border); background: var(--white); color: var(--muted); cursor: pointer; transition: all 0.15s; flex-shrink: 0; }
-.chip.active { background: var(--text); color: white; border-color: var(--text); }
+.chip { white-space: nowrap; padding: 6px 13px; border-radius: 99px; font-size: 12px; font-weight: 500; border: 1.5px solid var(--border); background: var(--surface); color: var(--text2); cursor: pointer; transition: all 0.15s; flex-shrink: 0; }
+.chip.active { background: var(--rose); color: #fff; border-color: var(--rose); }
 .chip:active { transform: scale(0.95); }
 
 .search-wrap { position: relative; margin-bottom: 8px; }
@@ -140,11 +145,11 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); font-size: 13px; pointer-events: none; }
 
 .sort-row { display: flex; justify-content: flex-end; margin-bottom: 10px; }
-.sort-row select { font-family: 'DM Sans', sans-serif; font-size: 12px; border: 1.5px solid var(--border); border-radius: 8px; padding: 5px 10px; background: var(--white); color: var(--muted); outline: none; }
+.sort-row select { font-family: 'DM Sans', sans-serif; font-size: 12px; border: 1.5px solid var(--border); border-radius: 8px; padding: 5px 10px; background: var(--surface); color: var(--text2); outline: none; }
 
 .items-list { display: flex; flex-direction: column; gap: 7px; }
 .item-card { background: var(--white); border-radius: var(--r); border: 1px solid var(--border); padding: 12px 13px; transition: all 0.2s; }
-.item-card.done { opacity: 0.6; background: #fafaf8; }
+.item-card.done { opacity: 0.6; background: var(--surface2); }
 .item-top { display: flex; gap: 9px; align-items: flex-start; }
 .item-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
 .item-body { flex: 1; min-width: 0; }
@@ -154,8 +159,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .tag { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; }
 .item-meta { font-size: 12px; color: var(--muted); margin-top: 4px; display: flex; flex-wrap: wrap; gap: 8px; }
 .overdue { color: #ef4444 !important; font-weight: 700; }
-.item-note { font-size: 12px; color: #bbb; font-style: italic; margin-top: 3px; }
-.added-by { font-size: 11px; color: #ccc; margin-top: 3px; }
+.item-note { font-size: 12px; color: var(--text2); font-style: italic; margin-top: 3px; }
+.added-by { font-size: 11px; color: var(--text2); margin-top: 3px; }
 .item-actions { display: flex; gap: 2px; flex-shrink: 0; }
 .act-btn { background: none; border: none; cursor: pointer; font-size: 16px; padding: 4px 5px; border-radius: 7px; transition: background 0.15s; }
 .act-btn:active { background: var(--border); }
@@ -168,18 +173,18 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .s-total .s-val { font-family: 'Lora', serif; font-size: 17px; }
 
 /* \u2500\u2500 EXPENSES \u2500\u2500 */
-.balance-card { padding: 20px; margin: 14px 0; background: var(--text); color: white; border-radius: var(--r); }
-.balance-card .bc-title { font-size: 12px; font-weight: 600; opacity: 0.6; text-transform: uppercase; letter-spacing: 0.05em; }
+.balance-card { padding: 20px; margin: 14px 0; background: var(--surface); color: var(--text); border-radius: var(--r); border: 1px solid var(--border); }
+.balance-card .bc-title { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
 .balance-card .bc-amount { font-family: 'Lora', serif; font-size: 30px; margin: 4px 0 2px; }
-.balance-card .bc-sub { font-size: 12px; opacity: 0.6; }
+.balance-card .bc-sub { font-size: 12px; color: var(--muted); }
 .balance-split { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; }
-.split-card { padding: 12px 14px; border-radius: 12px; }
-.split-card.you { background: var(--rose-soft); }
-.split-card.partner { background: var(--green-soft); }
+.split-card { padding: 12px 14px; border-radius: 12px; border: 1px solid var(--border); }
+.split-card.you { background: var(--rose-soft); border-color: var(--rose-border, rgba(200,90,66,0.2)); }
+.split-card.partner { background: var(--green-soft); border-color: var(--green-border); }
 .split-name { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
 .split-name.you { color: var(--rose); }
 .split-name.partner { color: var(--green); }
-.split-amount { font-family: 'Lora', serif; font-size: 18px; margin-top: 2px; }
+.split-amount { font-family: 'Lora', serif; font-size: 18px; margin-top: 2px; color: var(--text); }
 
 .exp-list { display: flex; flex-direction: column; gap: 7px; }
 .exp-item { background: var(--white); border: 1px solid var(--border); border-radius: var(--r); padding: 11px 13px; display: flex; align-items: center; gap: 11px; }
@@ -233,6 +238,22 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 /* \u2500\u2500 SECTION HEADER \u2500\u2500 */
 .sec-header { display: flex; justify-content: space-between; align-items: center; padding: 4px 0 10px; }
 .sec-title { font-family: 'Lora', serif; font-size: 16px; }
+
+/* ── THEME TRANSITIONS ── */
+.header, .bottom-nav, .card, .item-card, .exp-item, .saving-card,
+.form-sheet, .modal-box, .sort-row select, .search-wrap input,
+.fg input, .fg select, .fg textarea, .pri-grid div, .pGrid-card {
+  transition: background 0.3s, border-color 0.3s, color 0.3s;
+}
+
+/* ── DARK MODE SPECIFIC FIXES ── */
+:root .btn-ghost { border-color: var(--border2); }
+:root .sort-row select, :root .search-wrap input { color: var(--text); background: var(--surface2); border-color: var(--border2); }
+:root .fg input, :root .fg select, :root .fg textarea { background: var(--soft); color: var(--text); border-color: var(--border2); }
+:root .fg input::placeholder, :root .fg textarea::placeholder { color: var(--text2); }
+:root .search-wrap input::placeholder { color: var(--muted); }
+:root .setup-input { background: var(--surface); color: var(--text); border-color: var(--border2); }
+:root .modal-box { background: var(--surface); border-color: var(--border2); }
 </style>
 </head>
 <body>
@@ -466,11 +487,16 @@ const db = getDatabase(app);
 const CATS_NEEDS = ["🛒 Belanja","🏥 Kesehatan","💡 Tagihan","🏠 Rumah","👔 Pakaian","📚 Pendidikan","🍽️️ Makanan","🚗 Transportasi","💼 Kerja","🎯 Lainnya"];
 const CATS_EXP = ["🍽️️ Makan & Minum","🛒 Belanja","🚗 Transportasi","🏠 Rumah","🏥 Kesehatan","💡 Tagihan","🎮 Hiburan","👔 Fashion","📚 Pendidikan","💼 Kerja","🎯 Lainnya"];
 const PRIO = [
-  {level:1,label:"Must Have",color:"#dc2626",bg:"#fef2f2"},
-  {level:2,label:"Should Have",color:"#ea580c",bg:"#fff7ed"},
-  {level:3,label:"Nice to Have",color:"#ca8a04",bg:"#fefce8"},
-  {level:4,label:"Can Wait",color:"#6b7280",bg:"#f9fafb"},
+  {level:1,label:"Must Have",colorVar:"--p1",bgVar:"--p1bg"},
+  {level:2,label:"Should Have",colorVar:"--p2",bgVar:"--p2bg"},
+  {level:3,label:"Nice to Have",colorVar:"--p3",bgVar:"--p3bg"},
+  {level:4,label:"Can Wait",colorVar:"--p4",bgVar:"--p4bg"},
 ];
+
+// Get computed CSS variable value
+function cssVar(name) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
 const STATUS = ["⬜ Belum","🔄 Proses","✅ Selesai"];
 
 let userName = localStorage.getItem("berdua_name") || "";
@@ -671,9 +697,9 @@ function renderNeeds() {
     const cnt = arr.filter(i=>i.prioritas==p.level).length;
     const div=document.createElement("div");
     div.className="p-card"+(filterPrio===p.level?" active":"");
-    div.style.cssText=`background:${p.bg};opacity:${filterPrio&&filterPrio!==p.level?0.45:1}`;
-    if(filterPrio===p.level) div.style.borderColor=p.color;
-    div.innerHTML=`<div class="p-card-top"><div class="p-dot" style="background:${p.color}"></div><span class="p-lbl" style="color:${p.color}">P${p.level}</span></div><div class="p-name">${p.label}</div><div class="p-count" style="color:${p.color}">${cnt} item</div>`;
+    div.style.cssText=`background:${cssVar(p.bgVar)};opacity:${filterPrio&&filterPrio!==p.level?0.45:1}`;
+    if(filterPrio===p.level) div.style.borderColor=cssVar(p.colorVar);
+    div.innerHTML=`<div class="p-card-top"><div class="p-dot" style="background:${cssVar(p.colorVar)}"></div><span class="p-lbl" style="color:${cssVar(p.colorVar)}">P${p.level}</span></div><div class="p-name">${p.label}</div><div class="p-count" style="color:${cssVar(p.colorVar)}">${cnt} item</div>`;
     div.onclick=()=>{filterPrio=filterPrio===p.level?0:p.level;renderNeeds();};
     pg.appendChild(div);
   });
@@ -700,11 +726,11 @@ function renderNeeds() {
       const div=document.createElement("div");
       div.className="item-card"+(done?" done":"");
       div.innerHTML=`<div class="item-top">
-        <div class="item-dot" style="background:${p.color};margin-top:5px"></div>
+        <div class="item-dot" style="background:${cssVar(p.colorVar)};margin-top:5px"></div>
         <div class="item-body">
           <div class="item-name${done?" striked":""}">${item.nama||""}</div>
           <div class="item-tags">
-            <span class="tag" style="background:${p.bg};color:${p.color}">P${p.level} ${p.label}</span>
+            <span class="tag" style="background:${cssVar(p.bgVar)};color:${cssVar(p.colorVar)}">P${p.level} ${p.label}</span>
             <span style="font-size:11px;color:#bbb">${item.kategori||""}</span>
           </div>
           <div class="item-meta">
@@ -739,7 +765,7 @@ function renderNeeds() {
     sc.style.display="block";
     sr.innerHTML=PRIO.map(p=>{
       const t=arr.filter(i=>i.prioritas==p.level).reduce((s,i)=>s+(Number(i.harga)*(Number(i.qty)||1)||0),0);
-      return t?`<div class="s-item"><div class="s-label" style="color:${p.color}">P${p.level}</div><div class="s-val">${rp(t)}</div></div>`:"";
+      return t?`<div class="s-item"><div class="s-label" style="color:${cssVar(p.colorVar)}">P${p.level}</div><div class="s-val">${rp(t)}</div></div>`:"";
     }).join("")+`<div class="s-item s-total"><div class="s-label" style="color:var(--muted)">Total</div><div class="s-val" style="font-family:'Lora',serif;font-size:16px">${rp(totalEst)}</div></div>`;
   } else { sc.style.display="none"; }
 }
@@ -1058,6 +1084,11 @@ window.toggleTheme = function() {
   html.setAttribute('data-theme', next);
   document.getElementById('themeBtn').textContent = next === 'dark' ? '☀️ Light' : '🌙 Dark';
   localStorage.setItem('berdua_theme', next);
+  // Re-render to pick up new CSS variable colors
+  setTimeout(() => {
+    if(typeof renderNeeds === 'function') renderNeeds();
+    if(typeof renderExpenses === 'function' && currentPage === 'Expenses') renderExpenses();
+  }, 50);
 };
 // Restore saved theme
 (function() {
