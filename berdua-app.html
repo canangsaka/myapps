@@ -1091,22 +1091,22 @@ if(userName) {
 
 // ── THEME TOGGLE ──
 const THEME_KEY = 'berdua_theme';
-function applyTheme(theme) {
-  document.documentElement.setAttribute('data-theme', theme);
+function applyTheme(themeVal) {
+  document.documentElement.setAttribute('data-theme', themeVal);
   const btn = document.getElementById('themeToggle');
-  if (btn) btn.textContent = theme === 'dark' ? '☀️ Light' : '🌙 Dark';
-  localStorage.setItem(THEME_KEY, theme);
+  if (btn) btn.textContent = themeVal === 'dark' ? '☀️ Light' : '🌙 Dark';
+  localStorage.setItem(THEME_KEY, themeVal);
 }
 
 window.toggleTheme = function() {
-  const current = document.documentElement.getAttribute('data-theme') || 'dark';
-  applyTheme(current === 'dark' ? 'light' : 'dark');
+  const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+  applyTheme(currentTheme === 'dark' ? 'light' : 'dark');
 };
 
 // Init theme on load
 (function() {
-  const saved = localStorage.getItem(THEME_KEY) || 'dark';
-  applyTheme(saved);
+  const savedTheme = localStorage.getItem(THEME_KEY) || 'dark';
+  applyTheme(savedTheme);
 })();
 </script>
 </body>
