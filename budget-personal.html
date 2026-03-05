@@ -439,10 +439,11 @@ function populateSelects() {
 populateSelects();
 
 // ── FIREBASE ──
+function uPath(sub) { return "users/" + encodeURIComponent(userName) + "/" + sub; }
 function startListeners() {
-  onValue(ref(db,"transactions"), snap => { transactions = snap.val()||{}; refreshAll(); });
-  onValue(ref(db,"savings"), snap => { savings = snap.val()||{}; if(currentPage==="Savings") renderSavings(); });
-  onValue(ref(db,"budget"), snap => { budgetConfig = snap.val()||{}; if(!Object.keys(budgetConfig).length) budgetConfig=buildDefaultBudget(); if(currentPage==="Budget") renderBudget(); });
+  onValue(ref(db,uPath("transactions")), snap => { transactions = snap.val()||{}; refreshAll(); });
+  onValue(ref(db,uPath("savings")), snap => { savings = snap.val()||{}; if(currentPage==="Savings") renderSavings(); });
+  onValue(ref(db,uPath("budget")), snap => { budgetConfig = snap.val()||{}; if(!Object.keys(budgetConfig).length) budgetConfig=buildDefaultBudget(); if(currentPage==="Budget") renderBudget(); });
 }
 
 function buildDefaultBudget() {
@@ -569,15 +570,15 @@ window.submitTx = function() {
     note: document.getElementById("txNote").value.trim(),
     ts: Date.now(),
   };
-  if(editTxId) { update(ref(db,"transactions/"+editTxId), data); showToast("Diperbarui ✓"); }
-  else { push(ref(db,"transactions"), data); showToast("Dicatat ✓"); }
+  if(editTxId) { update(ref(db,uPath("transactions/"+editTxId)), data); showToast("Diperbarui ✓"); }
+  else { push(ref(db,uPath("transactions")), data); showToast("Dicatat ✓"); }
   closeForm("formTx");
 };
 
 window.editTx = function(id) { editTxId=id; openTxForm(transactions[id]); };
 window.deleteTx = function(id) {
   if(!confirm("Hapus transaksi ini?")) return;
-  remove(ref(db,"transactions/"+id)); showToast("Dihapus");
+  remove(ref(db,uPath("transactions/"+id))); showToast("Dihapus");
 };
 
 // ── SAVING FORM ──
@@ -615,8 +616,8 @@ window.submitSaving = function() {
     priority: Number(document.getElementById("sPriority").value)||1,
     ts: Date.now(),
   };
-  if(editSavingId) { update(ref(db,"savings/"+editSavingId), data); showToast("Diperbarui ✓"); }
-  else { push(ref(db,"savings"), data); showToast("Target dibuat ✓"); }
+  if(editSavingId) { update(ref(db,uPath("savings/"+editSavingId)), data); showToast("Diperbarui ✓"); }
+  else { push(ref(db,uPath("savings")), data); showToast("Target dibuat ✓"); }
   closeForm("formSaving");
 };
 
@@ -636,7 +637,7 @@ window.submitTopup = function() {
   const item=savings[id]; if(!item) return;
   const topups=item.topups||{};
   const newTopup={amount,date:document.getElementById("topupDate").value||today,note:document.getElementById("topupNote").value.trim(),ts:Date.now()};
-  push(ref(db,"savings/"+id+"/topups"),newTopup);
+  push(ref(db,uPath("savings/"+id+"/topups")),newTopup);
   showToast(rp(amount)+" ditabung ✓");
   closeForm("formTopup");
 };
@@ -644,7 +645,7 @@ window.submitTopup = function() {
 window.editSaving = function(id) { editSavingId=id; openSavingForm(savings[id]); };
 window.deleteSaving = function(id) {
   if(!confirm("Hapus target ini?")) return;
-  remove(ref(db,"savings/"+id)); showToast("Dihapus");
+  remove(ref(db,uPath("savings/"+id))); showToast("Dihapus");
 };
 
 // ── BUDGET SETUP ──
@@ -679,7 +680,7 @@ window.saveBudgetSetup = function() {
   const obj={};
   EXPENSE_CATS.forEach(c=>{ const v=Number(document.getElementById("bpct_"+c.id)?.value||0); obj[c.id]=v; total+=v; });
   if(total>100) { showToast("Total melebihi 100%!"); return; }
-  set(ref(db,"budget"), obj);
+  set(ref(db,uPath("budget")), obj);
   budgetConfig=obj;
   document.getElementById("modalBudget").classList.remove("open");
   renderBudget();
