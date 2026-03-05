@@ -252,22 +252,23 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
         <div class="sync-pill"><div class="sync-dot" id="syncDot"></div><span id="syncStatus">Sync</span></div>
       </div>
     </div>
+    <div class="progress-bar" id="headerProgress" style="display:none"><div class="progress-fill" id="progressFill" style="width:0%;background:var(--rose)"></div></div>
   </div>
 
   <!-- NEEDS LIST -->
   <div class="page active" id="pageNeeds">
     <div class="main">
       <div style="padding:12px 0 8px">
-        <div class="s-row" id="needsSummary"></div>
-        <div class="search-wrap"><input type="text" id="searchInput" placeholder="Cari item..." oninput="renderNeeds()"></div>
+        <div id="needsSummary" style="display:none"><div class="s-row" id="summaryRow"></div></div>
+        <div class="search-wrap"><input type="text" id="needsSearch" placeholder="Cari item..." oninput="renderNeeds()"></div>
         <div class="sort-row">
-          <select id="sortSelect" onchange="renderNeeds()">
+          <select id="needsSort" onchange="renderNeeds()">
             <option value="priority">Prioritas</option>
             <option value="name">Nama</option>
             <option value="price">Harga</option>
             <option value="newest">Terbaru</option>
           </select>
-          <div class="filter-chips" id="filterChips"></div>
+          <div class="filter-chips" id="filterRow"></div>
         </div>
       </div>
       <div class="needs-list" id="needsList"></div>
@@ -278,8 +279,18 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   <!-- EXPENSES -->
   <div class="page" id="pageExpenses">
     <div class="main">
-      <div class="balance-card" id="balanceCard"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0 8px">
+        <select id="expMonthSel" style="font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;border:1.5px solid var(--border2);border-radius:8px;padding:5px 10px;background:var(--surface);color:var(--text2);outline:none;-webkit-appearance:none;"></select>
+        <span id="pageSub" style="font-size:12px;color:var(--muted)"></span>
+      </div>
+      <div class="balance-card" id="balanceCard">
+        <div class="bc-label">Total Pengeluaran</div>
+        <div class="bc-amount" id="balanceTotal">Rp 0</div>
+        <div class="bc-sub" id="balanceSub"></div>
+        <div id="balanceSplit"></div>
+      </div>
       <div class="split-row" id="splitRow"></div>
+      <div id="pGrid"></div>
       <div class="sec-header">
         <div class="sec-title">Pengeluaran Bulan Ini</div>
       </div>
@@ -309,28 +320,30 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 <div class="form-overlay" id="formNeed">
   <div class="form-sheet">
     <div class="form-handle"></div>
-    <div class="form-title" id="needFormTitle">Item Baru</div>
+    <div class="form-title" id="needsFormTitle">Item Baru</div>
     <div class="form-grid">
-      <div class="fg full"><label>Nama Item *</label><input type="text" id="nName" placeholder="e.g. Rice cooker, Tiket konser..."></div>
+      <div class="fg full"><label>Nama Item *</label><input type="text" id="fNama" placeholder="e.g. Rice cooker, Tiket konser..."></div>
       <div class="fg"><label>Kategori</label>
-        <select id="nCat">
+        <select id="fKat">
           <option>🏠 Rumah</option><option>🍽️ Dapur</option><option>👔 Fashion</option>
           <option>💻 Elektronik</option><option>✈️ Liburan</option><option>🎮 Hiburan</option>
           <option>🏥 Kesehatan</option><option>📚 Pendidikan</option><option>🎯 Lainnya</option>
         </select>
       </div>
       <div class="fg"><label>Prioritas</label>
-        <select id="nPriority">
+        <select id="fPrio">
           <option value="1">🔴 P1 — Harus</option>
           <option value="2">🟠 P2 — Perlu</option>
           <option value="3" selected>🟡 P3 — Mau</option>
           <option value="4">⚪ P4 — Nanti</option>
         </select>
       </div>
-      <div class="fg"><label>Est. Harga (Rp)</label><input type="number" id="nPrice" placeholder="0"></div>
-      <div class="fg"><label>Deadline</label><input type="date" id="nDeadline"></div>
-      <div class="fg"><label>Toko / Sumber</label><input type="text" id="nStore" placeholder="Tokopedia, Shopee..."></div>
-      <div class="fg full"><label>Catatan</label><input type="text" id="nNote" placeholder="Opsional..."></div>
+      <div class="fg"><label>Jumlah</label><input type="number" id="fQty" placeholder="1"></div>
+      <div class="fg"><label>Satuan</label><input type="text" id="fSatuan" placeholder="pcs, buah..."></div>
+      <div class="fg"><label>Est. Harga (Rp)</label><input type="number" id="fHarga" placeholder="0"></div>
+      <div class="fg"><label>Deadline</label><input type="date" id="fDeadline"></div>
+      <div class="fg"><label>Toko / Sumber</label><input type="text" id="fToko" placeholder="Tokopedia, Shopee..."></div>
+      <div class="fg full"><label>Catatan</label><input type="text" id="fNotes" placeholder="Opsional..."></div>
     </div>
     <div class="form-actions">
       <button class="btn btn-rose" onclick="submitNeed()">Simpan</button>
@@ -348,8 +361,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <div class="fg full"><label>Keterangan *</label><input type="text" id="eDesc" placeholder="e.g. Makan malam, Belanja..."></div>
       <div class="fg"><label>Jumlah (Rp) *</label><input type="number" id="eAmount" placeholder="0"></div>
       <div class="fg"><label>Tanggal</label><input type="date" id="eDate"></div>
+      <div class="fg"><label>Tipe</label>
+        <select id="eType">
+          <option value="personal">Personal</option>
+          <option value="bersama">💕 Bersama</option>
+        </select>
+      </div>
       <div class="fg"><label>Dibayar oleh</label>
-        <select id="eBy">
+        <select id="ePaidBy">
           <option value="you">Kamu</option>
           <option value="partner">Pasangan</option>
           <option value="bersama">💕 Bersama</option>
@@ -395,11 +414,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   <div class="form-sheet">
     <div class="form-handle"></div>
     <div class="form-title">Tambah Tabungan</div>
-    <input type="hidden" id="topupId">
+    <input type="hidden" id="topupSavingId">
     <div class="form-grid">
       <div class="fg"><label>Jumlah (Rp) *</label><input type="number" id="topupAmount" placeholder="0"></div>
       <div class="fg"><label>Dari siapa</label>
-        <select id="topupBy">
+        <select id="topupFrom">
           <option value="you">Kamu</option>
           <option value="partner">Pasangan</option>
         </select>
