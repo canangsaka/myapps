@@ -278,8 +278,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     <div class="main">
       <div class="month-row">
         <select class="month-sel" id="dashMonth" onchange="onMonthChange()"></select>
-        <span style="font-size:11px;color:var(--muted)" id="dashSub"></span>
+        <button onclick="openLaporan()" style="font-size:11px;font-weight:700;color:var(--gold);background:none;border:1px solid var(--gold-border);border-radius:99px;padding:4px 12px;cursor:pointer;font-family:'DM Sans',sans-serif;">📄 Laporan</button>
       </div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:6px" id="dashSub"></div>
       <div class="stat-grid">
         <div class="stat-card"><div class="stat-label">Pemasukan</div><div class="stat-val income" id="dIncome">Rp 0</div></div>
         <div class="stat-card"><div class="stat-label">Pengeluaran</div><div class="stat-val expense" id="dExpense">Rp 0</div></div>
@@ -313,6 +314,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
           <button class="tx-tab" id="tabExp" onclick="setTxTab('exp')">Keluar</button>
         </div>
       </div>
+      <div id="txSummary"></div>
+      <div id="txCatFilter" style="display:flex;gap:5px;overflow-x:auto;padding:2px 0 10px;scrollbar-width:none;"></div>
       <div id="txList"></div>
       <div style="height:8px"></div>
     </div>
@@ -328,6 +331,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
           <button onclick="saveGaji()" style="padding:9px 16px;border-radius:10px;background:var(--gold);color:#000;border:none;font-weight:700;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;">Simpan</button>
         </div>
       </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <div class="sec-title" style="margin:0">Alokasi per Kategori</div>
+        <button onclick="toggleBudgetEdit()" id="budgetEditBtn" style="font-size:11px;font-weight:700;color:var(--gold);background:none;border:1px solid var(--gold-border);border-radius:99px;padding:4px 12px;cursor:pointer;font-family:'DM Sans',sans-serif;">✏️ Edit Alokasi</button>
+      </div>
+      <div id="budgetAlloc" style="display:none;margin-bottom:12px;"></div>
       <div id="budgetList"></div>
       <div style="height:8px"></div>
     </div>
@@ -449,6 +457,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   </div>
 </div>
 
+<!-- MODAL: LAPORAN -->
+<div class="sheet-overlay" id="laporanOverlay" onclick="closeLaporan()"></div>
+<div class="form-sheet" id="laporanSheet" style="max-height:85vh">
+  <div class="sheet-handle"></div>
+  <div class="sheet-title" id="laporanTitle">Laporan Bulan Ini</div>
+  <div id="laporanContent"></div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -512,6 +528,8 @@ const today = new Date().toISOString().split("T")[0];
 let userName = localStorage.getItem("budget_name_v2") || "";
 let currentPage = "Dash";
 let txTab = "all";
+let txCatFilter = "";
+let budgetEditMode = false;
 let editTxId = null;
 let editSavingId = null;
 let editListId = null;
@@ -698,6 +716,11 @@ function renderDash() {
 }
 
 // ── TRANSAKSI ──
+window.setTxCat = function(cat) {
+  txCatFilter = cat;
+  renderTx();
+};
+
 window.setTxTab = function(tab) {
   txTab = tab;
   ["all","inc","exp"].forEach(t => document.getElementById("tab"+t.charAt(0).toUpperCase()+t.slice(1)).classList.toggle("active", t===tab));
@@ -711,7 +734,30 @@ function renderTx() {
     .filter(t => t.date && t.date.slice(0,7) === month);
   if(txTab==="inc") arr = arr.filter(t => t.type==="income");
   if(txTab==="exp") arr = arr.filter(t => t.type==="expense");
+
+  // Category filter chips
+  const catFilterEl = document.getElementById("txCatFilter");
+  const allCats = [...new Set(arr.map(t => t.cat).filter(Boolean))];
+  catFilterEl.innerHTML = allCats.length > 1 ? [
+    `<button class="tx-tab ${!txCatFilter?"active":""}" onclick="setTxCat('')">Semua</button>`,
+    ...allCats.map(cid => {
+      const c = [...EXPENSE_CATS,...INCOME_CATS].find(x=>x.id===cid);
+      return `<button class="tx-tab ${txCatFilter===cid?"active":""}" onclick="setTxCat('${cid}')">${c?c.name.split(" ")[0]+" "+c.name.split(" ").slice(1).join(" "):cid}</button>`;
+    })
+  ].join("") : "";
+
+  if(txCatFilter) arr = arr.filter(t => t.cat === txCatFilter);
   arr.sort((a,b) => b.date > a.date ? 1 : -1);
+
+  // Summary
+  const totalInc = arr.filter(t=>t.type==="income").reduce((s,t)=>s+t.amount,0);
+  const totalExp = arr.filter(t=>t.type==="expense").reduce((s,t)=>s+t.amount,0);
+  const summaryEl = document.getElementById("txSummary");
+  summaryEl.innerHTML = arr.length ? `<div class="summary-bar" style="margin-bottom:8px">
+    <span class="summary-pill">📥 <span style="color:var(--green)">${rp(totalInc)}</span></span>
+    <span class="summary-pill">📤 <span style="color:var(--red)">${rp(totalExp)}</span></span>
+    <span class="summary-pill">Sisa <span style="color:${totalInc-totalExp>=0?"var(--green)":"var(--red)"}">${rp(totalInc-totalExp)}</span></span>
+  </div>` : "";
 
   const el = document.getElementById("txList");
   if(!arr.length) { el.innerHTML = `<div class="empty-state"><div class="empty-icon">💸</div><div class="empty-text">Belum ada transaksi<br>bulan ${fmtMonth(month)}</div></div>`; return; }
@@ -795,6 +841,29 @@ function renderBudget() {
   const txArr = Object.values(transactions).filter(t => t.date?.slice(0,7)===month && t.type==="expense");
   const el = document.getElementById("budgetList");
   if(!gaji) { el.innerHTML = `<div class="card" style="text-align:center;padding:28px;color:var(--muted);font-size:13px">Set gaji dulu di atas untuk melihat budget plan</div>`; return; }
+
+  // Render alloc editor
+  const allocEl = document.getElementById("budgetAlloc");
+  if(budgetEditMode) {
+    const totalPct = EXPENSE_CATS.reduce((s,c) => s+(budgetConfig[c.id]?.pct||0),0);
+    allocEl.innerHTML = `<div class="card" style="margin-bottom:4px">
+      <div style="font-size:11px;color:var(--text2);margin-bottom:12px">Total alokasi: <strong style="color:${totalPct>100?"var(--red)":totalPct===100?"var(--green)":"var(--gold)"}">${totalPct}%</strong> dari 100%</div>
+      ${EXPENSE_CATS.map(c => {
+        const pctVal = budgetConfig[c.id]?.pct || 0;
+        return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <span style="flex:1;font-size:13px;font-weight:600">${c.name}</span>
+          <input type="number" id="allocPct_${c.id}" value="${pctVal}" min="0" max="100"
+            style="width:64px;padding:6px 8px;border:1.5px solid var(--border2);border-radius:8px;background:var(--surface2);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;text-align:center;outline:none;">
+          <span style="font-size:11px;color:var(--muted);width:16px">%</span>
+        </div>`;
+      }).join("")}
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button onclick="saveAlloc()" style="flex:1;padding:10px;border-radius:10px;background:var(--gold);color:#000;border:none;font-weight:700;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;">Simpan Alokasi</button>
+        <button onclick="toggleBudgetEdit()" style="padding:10px 14px;border-radius:10px;background:none;border:1.5px solid var(--border2);color:var(--text2);font-weight:700;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;">Batal</button>
+      </div>
+    </div>`;
+  }
+
   el.innerHTML = EXPENSE_CATS.map(cat => {
     const cfg = budgetConfig[cat.id] || {};
     const target = cfg.target || Math.round(gaji * (cfg.pct || 0) / 100);
@@ -805,21 +874,53 @@ function renderBudget() {
     return `<div class="budget-item">
       <div class="budget-row">
         <span class="budget-name">${cat.name}</span>
-        <span class="budget-pct ${pctCls}">${pct}%</span>
+        <span class="budget-pct ${pctCls}">${pct}% terpakai</span>
       </div>
-      <div class="budget-amounts">${rp(spent)} dari ${rp(target)}</div>
+      <div class="budget-amounts">${rp(spent)} dari ${rp(target)} (${cfg.pct||0}% gaji)</div>
       <div class="budget-bar-bg"><div class="budget-bar-fill" style="width:${Math.min(pct,100)}%;background:${barCls}"></div></div>
     </div>`;
   }).join("");
 }
 
+window.toggleBudgetEdit = function() {
+  budgetEditMode = !budgetEditMode;
+  const btn = document.getElementById("budgetEditBtn");
+  const allocEl = document.getElementById("budgetAlloc");
+  btn.textContent = budgetEditMode ? "✕ Tutup" : "✏️ Edit Alokasi";
+  allocEl.style.display = budgetEditMode ? "block" : "none";
+  renderBudget();
+};
+
+window.saveAlloc = function() {
+  const gaji = budgetConfig.gaji || 0;
+  const obj = { gaji };
+  let total = 0;
+  EXPENSE_CATS.forEach(c => {
+    const pct = Number(document.getElementById("allocPct_"+c.id)?.value) || 0;
+    total += pct;
+    obj[c.id] = { pct, target: Math.round(gaji * pct / 100) };
+  });
+  if(total > 100) { showToast("Total melebihi 100%! Sekarang "+total+"%"); return; }
+  set(ref(db, uPath("budget")), obj);
+  budgetEditMode = false;
+  document.getElementById("budgetAlloc").style.display = "none";
+  document.getElementById("budgetEditBtn").textContent = "✏️ Edit Alokasi";
+  showToast("Alokasi disimpan ✓");
+};
+
 window.saveGaji = function() {
   const g = Number(document.getElementById("gajiInput").value);
   if(!g) { showToast("Masukkan jumlah gaji"); return; }
+  // Preserve existing custom pct, only recalculate targets
   const obj = { gaji: g };
-  DEFAULT_BUDGET.forEach(d => { obj[d.id] = { pct: d.pct, target: Math.round(g * d.pct / 100) }; });
+  EXPENSE_CATS.forEach(c => {
+    const existPct = budgetConfig[c.id]?.pct;
+    const defaultPct = DEFAULT_BUDGET.find(d=>d.id===c.id)?.pct || 0;
+    const pct = existPct !== undefined ? existPct : defaultPct;
+    obj[c.id] = { pct, target: Math.round(g * pct / 100) };
+  });
   set(ref(db, uPath("budget")), obj);
-  showToast("Budget diupdate ✓");
+  showToast("Gaji diupdate ✓");
 };
 
 // ── TABUNGAN ──
@@ -1070,6 +1171,71 @@ window.openForm = function() {
 window.closeForm = function() {
   ["txForm","savingForm","listForm"].forEach(id => document.getElementById(id).classList.remove("open"));
   document.getElementById("overlay").classList.remove("open");
+};
+
+// Reset txCatFilter when switching tabs
+const _origSetTxTab = window.setTxTab;
+window.setTxTab = function(tab) {
+  txCatFilter = "";
+  _origSetTxTab(tab);
+};
+
+// ── LAPORAN ──
+window.openLaporan = function() {
+  const month = selectedMonth;
+  const txArr = Object.values(transactions).filter(t => t.date?.slice(0,7)===month);
+  const income = txArr.filter(t=>t.type==="income").reduce((s,t)=>s+t.amount,0);
+  const expense = txArr.filter(t=>t.type==="expense").reduce((s,t)=>s+t.amount,0);
+  const balance = income - expense;
+  const savingRate = income>0 ? Math.round(balance/income*100) : 0;
+
+  // Top pengeluaran
+  const expArr = txArr.filter(t=>t.type==="expense").sort((a,b)=>b.amount-a.amount);
+  const top5 = expArr.slice(0,5);
+
+  // Per kategori
+  const byCat = {};
+  expArr.forEach(t => { byCat[t.cat] = (byCat[t.cat]||0)+t.amount; });
+  const catRows = Object.entries(byCat).sort((a,b)=>b[1]-a[1]).map(([cid,amt]) => {
+    const c = EXPENSE_CATS.find(x=>x.id===cid);
+    return `<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:13px">${c?c.name:cid}</span>
+      <span style="font-size:13px;font-weight:700;color:var(--red)">-${rp(amt)}</span>
+    </div>`;
+  }).join("");
+
+  document.getElementById("laporanTitle").textContent = "Laporan "+fmtMonth(month);
+  document.getElementById("laporanContent").innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
+      <div class="stat-card"><div class="stat-label">Pemasukan</div><div class="stat-val income">${rp(income)}</div></div>
+      <div class="stat-card"><div class="stat-label">Pengeluaran</div><div class="stat-val expense">${rp(expense)}</div></div>
+      <div class="stat-card"><div class="stat-label">Sisa</div><div class="stat-val" style="color:${balance>=0?"var(--green)":"var(--red)"}">${rp(balance)}</div></div>
+      <div class="stat-card"><div class="stat-label">Saving Rate</div><div class="stat-val saving">${savingRate}%</div></div>
+    </div>
+    <div class="sec-title">Pengeluaran per Kategori</div>
+    <div class="card" style="margin-bottom:14px;padding:4px 14px">${catRows || "<div style='padding:12px 0;font-size:13px;color:var(--muted);text-align:center'>Belum ada pengeluaran</div>"}</div>
+    <div class="sec-title">Top 5 Pengeluaran Terbesar</div>
+    <div class="card" style="padding:4px 14px">
+      ${top5.map(t => {
+        const c = EXPENSE_CATS.find(x=>x.id===t.cat);
+        return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
+          <div>
+            <div style="font-size:13px;font-weight:600">${t.desc||"-"}</div>
+            <div style="font-size:11px;color:var(--text2)">${c?c.name:""} · ${fmtDate(t.date)}</div>
+          </div>
+          <span style="font-size:13px;font-weight:700;color:var(--red)">-${rp(t.amount)}</span>
+        </div>`;
+      }).join("") || "<div style='padding:12px 0;font-size:13px;color:var(--muted);text-align:center'>Belum ada pengeluaran</div>"}
+    </div>
+    <div style="height:12px"></div>
+  `;
+  document.getElementById("laporanSheet").classList.add("open");
+  document.getElementById("laporanOverlay").classList.add("open");
+};
+
+window.closeLaporan = function() {
+  document.getElementById("laporanSheet").classList.remove("open");
+  document.getElementById("laporanOverlay").classList.remove("open");
 };
 
 // ── THEME ──
