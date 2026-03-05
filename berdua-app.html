@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -274,7 +274,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
       <div class="p-grid" id="pGrid"></div>
       <div class="filter-row" id="filterRow"></div>
       <div class="search-wrap">
-        <span class="search-icon">\ud83d\udd0d</span>
+        <span class="search-icon">🔍</span>
         <input type="text" id="needsSearch" placeholder="Cari item..." oninput="renderNeeds()">
       </div>
       <div class="sort-row">
@@ -462,16 +462,16 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// \u2500\u2500 GLOBALS \u2500\u2500
-const CATS_NEEDS = ["\ud83d\uded2 Belanja","🏥 Kesehatan","💡 Tagihan","🏠 Rumah","👔 Pakaian","📚 Pendidikan","🍽️\ufe0f Makanan","🚗 Transportasi","\ud83d\udcbc Kerja","🎯 Lainnya"];
-const CATS_EXP = ["🍽️\ufe0f Makan & Minum","\ud83d\uded2 Belanja","🚗 Transportasi","🏠 Rumah","🏥 Kesehatan","💡 Tagihan","🎮 Hiburan","👔 Fashion","📚 Pendidikan","\ud83d\udcbc Kerja","🎯 Lainnya"];
+// ── GLOBALS ──
+const CATS_NEEDS = ["🛒 Belanja","🏥 Kesehatan","💡 Tagihan","🏠 Rumah","👔 Pakaian","📚 Pendidikan","🍽️️ Makanan","🚗 Transportasi","💼 Kerja","🎯 Lainnya"];
+const CATS_EXP = ["🍽️️ Makan & Minum","🛒 Belanja","🚗 Transportasi","🏠 Rumah","🏥 Kesehatan","💡 Tagihan","🎮 Hiburan","👔 Fashion","📚 Pendidikan","💼 Kerja","🎯 Lainnya"];
 const PRIO = [
   {level:1,label:"Must Have",color:"#dc2626",bg:"#fef2f2"},
   {level:2,label:"Should Have",color:"#ea580c",bg:"#fff7ed"},
   {level:3,label:"Nice to Have",color:"#ca8a04",bg:"#fefce8"},
   {level:4,label:"Can Wait",color:"#6b7280",bg:"#f9fafb"},
 ];
-const STATUS = ["\u2b1c Belum","\ud83d\udd04 Proses","✅ Selesai"];
+const STATUS = ["⬜ Belum","🔄 Proses","✅ Selesai"];
 
 let userName = localStorage.getItem("berdua_name") || "";
 let partnerName = "Pasangan";
@@ -489,7 +489,7 @@ let selectedMonth = "";
 const today = new Date().toISOString().split("T")[0];
 selectedMonth = today.slice(0,7);
 
-// \u2500\u2500 SETUP \u2500\u2500
+// ── SETUP ──
 function populate() {
   // needs categories
   const fc = document.getElementById("fKat");
@@ -500,7 +500,7 @@ function populate() {
 }
 populate();
 
-// \u2500\u2500 FIREBASE LISTENERS \u2500\u2500
+// ── FIREBASE LISTENERS ──
 function startListeners() {
   onValue(ref(db,"needs"), snap => {
     needs = snap.val() || {};
@@ -532,7 +532,7 @@ function syncIndicator(ok) {
   document.getElementById("syncDot").className = "sync-dot" + (ok?"" :" offline");
 }
 
-// \u2500\u2500 NAME \u2500\u2500
+// ── NAME ──
 window.saveName = function() {
   const v = document.getElementById("setupInput").value.trim();
   if(!v) return;
@@ -547,7 +547,7 @@ window.saveName = function() {
   showToast("Halo "+userName+" 👋");
 };
 
-// \u2500\u2500 PAGE SWITCH \u2500\u2500
+// ── PAGE SWITCH ──
 window.switchPage = function(page) {
   currentPage = page;
   ["Needs","Expenses","Savings"].forEach(p => {
@@ -568,7 +568,7 @@ window.openFab = function() {
   else if(currentPage==="Savings") { editSavingId=null; openSavingForm(); }
 };
 
-// \u2500\u2500 FORM UTILS \u2500\u2500
+// ── FORM UTILS ──
 window.closeForm = function(id) {
   document.getElementById(id).classList.remove("open");
 };
@@ -580,9 +580,9 @@ function openForm(id) {
   };
 }
 
-// \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
-// \u2500\u2500 NEEDS \u2500\u2500
-// \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// ─────────────────────────────────────────────
+// ── NEEDS ──
+// ─────────────────────────────────────────────
 function openNeedForm(item) {
   document.getElementById("needsFormTitle").textContent = item ? "Edit Item" : "Item Baru";
   if(item) {
@@ -618,16 +618,16 @@ window.submitNeed = function() {
     deadline: document.getElementById("fDeadline").value,
     toko: document.getElementById("fToko").value.trim(),
     notes: document.getElementById("fNotes").value.trim(),
-    status: "\u2b1c Belum",
+    status: "⬜ Belum",
     addedBy: userName,
     ts: Date.now(),
   };
   if(editNeedId) {
     update(ref(db,"needs/"+editNeedId), data);
-    showToast("Item diperbarui \u2713");
+    showToast("Item diperbarui ✓");
   } else {
     push(ref(db,"needs"), data);
-    showToast("Item ditambah \u2713");
+    showToast("Item ditambah ✓");
   }
   closeForm("formNeeds");
 };
@@ -708,17 +708,17 @@ function renderNeeds() {
             <span style="font-size:11px;color:#bbb">${item.kategori||""}</span>
           </div>
           <div class="item-meta">
-            <span>${item.qty||1} ${item.satuan||""}${item.harga?" \u00b7 "+rp(item.harga*(item.qty||1)):""}</span>
-            ${item.deadline?`<span class="${overdue?"overdue":""}">${overdue?"\u26a0\ufe0f ":"\ud83d\udcc5 "}${fmtDate(item.deadline)}</span>`:""}
-            ${item.toko?`<span>\ud83d\udccd ${item.toko}</span>`:""}
+            <span>${item.qty||1} ${item.satuan||""}${item.harga?" · "+rp(item.harga*(item.qty||1)):""}</span>
+            ${item.deadline?`<span class="${overdue?"overdue":""}">${overdue?"⚠️ ":"📅 "}${fmtDate(item.deadline)}</span>`:""}
+            ${item.toko?`<span>📍 ${item.toko}</span>`:""}
           </div>
           ${item.notes?`<div class="item-note">"${item.notes}"</div>`:""}
           ${item.addedBy?`<div class="added-by">oleh ${item.addedBy}</div>`:""}
         </div>
         <div class="item-actions">
-          <button class="act-btn" onclick="cycleStatus('${item.id}')">${item.status==="✅ Selesai"?"✅":item.status==="\ud83d\udd04 Proses"?"\ud83d\udd04":"\u2b1c"}</button>
-          <button class="act-btn" onclick="editNeed('${item.id}')">✏️\ufe0f</button>
-          <button class="act-btn" onclick="deleteNeed('${item.id}')">\ud83d\uddd1\ufe0f</button>
+          <button class="act-btn" onclick="cycleStatus('${item.id}')">${item.status==="✅ Selesai"?"✅":item.status==="🔄 Proses"?"🔄":"⬜"}</button>
+          <button class="act-btn" onclick="editNeed('${item.id}')">✏️️</button>
+          <button class="act-btn" onclick="deleteNeed('${item.id}')">🗑️</button>
         </div>
       </div>`;
       list.appendChild(div);
@@ -730,7 +730,7 @@ function renderNeeds() {
   const total=arr.length;
   document.getElementById("progressFill").style.width=(total?(done/total*100):0)+"%";
   const totalEst=arr.reduce((s,i)=>s+(Number(i.harga)*Number(i.qty||1)||0),0);
-  document.getElementById("pageSub").textContent=`${done}/${total} selesai \u00b7 Est. ${rp(totalEst)}`;
+  document.getElementById("pageSub").textContent=`${done}/${total} selesai · Est. ${rp(totalEst)}`;
 
   // summary
   const sc=document.getElementById("needsSummary");
@@ -744,9 +744,9 @@ function renderNeeds() {
   } else { sc.style.display="none"; }
 }
 
-// \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
-// \u2500\u2500 EXPENSES \u2500\u2500
-// \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// ─────────────────────────────────────────────
+// ── EXPENSES ──
+// ─────────────────────────────────────────────
 function openExpForm(item) {
   document.getElementById("expFormTitle").textContent = item?"Edit Pengeluaran":"Catat Pengeluaran";
   if(item) {
@@ -786,10 +786,10 @@ window.submitExpense = function() {
   };
   if(editExpId) {
     update(ref(db,"expenses/"+editExpId), data);
-    showToast("Diperbarui \u2713");
+    showToast("Diperbarui ✓");
   } else {
     push(ref(db,"expenses"), data);
-    showToast("Dicatat \u2713");
+    showToast("Dicatat ✓");
   }
   closeForm("formExpense");
 };
@@ -838,7 +838,7 @@ function renderExpenses() {
       <div class="split-amount">${rp(partnerTotal)}</div>
     </div>`;
 
-  document.getElementById("pageSub").textContent=`${fmtMonth(selectedMonth)} \u00b7 ${arr.length} transaksi`;
+  document.getElementById("pageSub").textContent=`${fmtMonth(selectedMonth)} · ${arr.length} transaksi`;
 
   const el=document.getElementById("expList"); el.innerHTML="";
   if(!arr.length) {
@@ -867,15 +867,15 @@ function renderExpenses() {
           <div class="exp-meta">
             <span>${item.cat||""}</span>
             ${item.note?`<span>${item.note}</span>`:""}
-            <span>${item.type==="bersama"?"\ud83d\udc6b Bersama":"\ud83d\udc64 Personal"}</span>
+            <span>${item.type==="bersama"?"👫 Bersama":"👤 Personal"}</span>
           </div>
         </div>
         <div class="exp-amount">
           <div class="exp-rp">${rp(item.amount)}</div>
           <div class="exp-who ${whoClass}">${whoLabel}</div>
           <div style="display:flex;gap:3px;justify-content:flex-end;margin-top:4px;">
-            <button class="act-btn" onclick="editExp('${item.id}')">✏️\ufe0f</button>
-            <button class="act-btn" onclick="deleteExp('${item.id}')">\ud83d\uddd1\ufe0f</button>
+            <button class="act-btn" onclick="editExp('${item.id}')">✏️️</button>
+            <button class="act-btn" onclick="deleteExp('${item.id}')">🗑️</button>
           </div>
         </div>`;
       el.appendChild(div);
@@ -883,9 +883,9 @@ function renderExpenses() {
   });
 }
 
-// \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
-// \u2500\u2500 SAVINGS \u2500\u2500
-// \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+// ─────────────────────────────────────────────
+// ── SAVINGS ──
+// ─────────────────────────────────────────────
 function openSavingForm(item) {
   document.getElementById("savingFormTitle").textContent = item?"Edit Target":"Target Baru";
   if(item) {
@@ -917,10 +917,10 @@ window.submitSaving = function() {
   };
   if(editSavingId) {
     update(ref(db,"savings/"+editSavingId), data);
-    showToast("Target diperbarui \u2713");
+    showToast("Target diperbarui ✓");
   } else {
     push(ref(db,"savings"), data);
-    showToast("Target ditambah \u2713");
+    showToast("Target ditambah ✓");
   }
   closeForm("formSaving");
 };
@@ -944,7 +944,7 @@ window.submitTopup = function() {
   const myKey=encodeURIComponent(from==="you"?userName:partnerName);
   const current=contribs[myKey]||0;
   update(ref(db,"savings/"+id+"/contribs"), {[myKey]: current+amount});
-  showToast(rp(amount)+" ditabung \u2713");
+  showToast(rp(amount)+" ditabung ✓");
   closeForm("formTopup");
 };
 
@@ -992,12 +992,12 @@ function renderSavings() {
         <div>
           <div style="font-size:26px;margin-bottom:4px">${item.emoji||"🎯"}</div>
           <div class="saving-name">${item.name||""}</div>
-          ${item.deadline?`<div class="saving-deadline">\ud83d\udcc5 Target ${fmtDate(item.deadline)}</div>`:""}
+          ${item.deadline?`<div class="saving-deadline">📅 Target ${fmtDate(item.deadline)}</div>`:""}
           ${item.note?`<div class="saving-deadline">${item.note}</div>`:""}
         </div>
         <div style="text-align:right">
           <div style="font-family:'Lora',serif;font-size:20px;font-weight:700">${pct}%</div>
-          <div style="font-size:11px;color:var(--muted)">${done?"\ud83c\udf89 Tercapai!":"tersimpan"}</div>
+          <div style="font-size:11px;color:var(--muted)">${done?"🎉 Tercapai!":"tersimpan"}</div>
         </div>
       </div>
       <div class="saving-progress"><div class="saving-fill${done?" done":""}" style="width:${pct}%"></div></div>
@@ -1017,14 +1017,14 @@ function renderSavings() {
       </div>
       <div class="saving-actions">
         <button class="btn-topup" onclick="openTopup('${item.id}')">+ Tabung</button>
-        <button class="act-btn" onclick="editSaving('${item.id}')">✏️\ufe0f</button>
-        <button class="act-btn" onclick="deleteSaving('${item.id}')">\ud83d\uddd1\ufe0f</button>
+        <button class="act-btn" onclick="editSaving('${item.id}')">✏️️</button>
+        <button class="act-btn" onclick="deleteSaving('${item.id}')">🗑️</button>
       </div>`;
     list.appendChild(div);
   });
 }
 
-// \u2500\u2500 UTILS \u2500\u2500
+// ── UTILS ──
 function rp(v) { if(!v) return "Rp 0"; return "Rp "+Number(v).toLocaleString("id-ID"); }
 function fmtDate(d) { if(!d) return ""; try { return new Date(d+"T00:00:00").toLocaleDateString("id-ID",{day:"numeric",month:"short"}); } catch(e){return d;} }
 function fmtDateFull(d) { if(!d) return ""; try { return new Date(d+"T00:00:00").toLocaleDateString("id-ID",{weekday:"long",day:"numeric",month:"long"}); } catch(e){return d;} }
@@ -1041,7 +1041,7 @@ window.renderNeeds = renderNeeds;
 window.renderExpenses = renderExpenses;
 window.renderSavings = renderSavings;
 
-// \u2500\u2500 INIT \u2500\u2500
+// ── INIT ──
 if(userName) {
   document.getElementById("setupScreen").style.display="none";
   document.getElementById("appRoot").style.display="block";
