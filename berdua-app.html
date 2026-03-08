@@ -314,6 +314,15 @@ body { transition: background 0.3s, color 0.3s; font-family: 'DM Sans', sans-ser
     </div>
   </div>
 
+    <!-- PAGE: WISHLIST -->
+  <div class="page" id="pageWishlist">
+    <div class="main">
+      <div id="wishlistSummary"></div>
+      <div id="wishlistItems"></div>
+      <div style="height:8px"></div>
+    </div>
+  </div>
+
   <div class="page" id="pageExpenses">
     <div class="main">
       <div class="balance-card" id="balanceCard">
@@ -343,6 +352,10 @@ body { transition: background 0.3s, color 0.3s; font-family: 'DM Sans', sans-ser
     <button class="nav-btn active" id="navNeeds" onclick="switchPage('Needs')">
       <span class="nav-icon">📋</span>
       <span class="nav-label">List</span>
+    </button>
+    <button class="nav-btn" id="navWishlist" onclick="switchPage('Wishlist')">
+      <span class="nav-icon">⭐</span>
+      <span class="nav-label">Wishlist</span>
     </button>
     <button class="nav-btn" id="navExpenses" onclick="switchPage('Expenses')">
       <span class="nav-icon">💸</span>
@@ -505,11 +518,13 @@ let currentPage = "Needs";
 let needs = {};
 let expenses = {};
 let savings = {};
+let wishlist = {};
 let filterPrio = 0;
 let filterStatus = "Semua";
 let editNeedId = null;
 let editExpId = null;
 let editSavingId = null;
+let editWishId = null;
 let selectedMonth = "";
 
 const today = new Date().toISOString().split("T")[0];
@@ -541,6 +556,11 @@ function startListeners() {
   onValue(ref(db,"savings"), snap => {
     savings = snap.val() || {};
     if(currentPage==="Savings") renderSavings();
+    syncIndicator(true);
+  });
+  onValue(ref(db,"wishlist"), snap => {
+    wishlist = snap.val() || {};
+    if(currentPage==="Wishlist") renderWishlist();
     syncIndicator(true);
   });
   onValue(ref(db,"meta"), snap => {
@@ -576,11 +596,11 @@ window.saveName = function() {
 // ── PAGE SWITCH ──
 window.switchPage = function(page) {
   currentPage = page;
-  ["Needs","Expenses","Savings"].forEach(p => {
+  ["Needs","Wishlist","Expenses","Savings"].forEach(p => {
     document.getElementById("page"+p).classList.toggle("active", p===page);
     document.getElementById("nav"+p).classList.toggle("active", p===page);
   });
-  const titles = {Needs:"List Kebutuhan",Expenses:"Catatan Keuangan",Savings:"Tabungan Bersama"};
+  const titles = {Needs:"List Kebutuhan",Wishlist:"Wishlist Berdua",Expenses:"Catatan Keuangan",Savings:"Tabungan Bersama"};
   document.getElementById("pageTitle").textContent = titles[page];
   document.getElementById("headerProgress").style.display = page==="Needs" ? "block" : "none";
   if(page==="Needs") { renderNeeds(); }
@@ -591,7 +611,13 @@ window.switchPage = function(page) {
 window.openFab = function() {
   if(currentPage==="Needs") { editNeedId=null; openNeedForm(); }
   else if(currentPage==="Expenses") { editExpId=null; openExpForm(); }
-  else if(currentPage==="Savings") { editSavingId=null; openSavingForm(); }
+  else if(currentPage==="Wishlist") {
+    editWishId=null;
+    document.getElementById("wFormTitle").textContent="Wishlist Baru";
+    ["wNama","wHarga","wKat","wCatatan"].forEach(i=>document.getElementById(i).value="");
+    document.getElementById("wPrio").value="2";
+    openForm("wishForm");
+  } else if(currentPage==="Savings") { editSavingId=null; openSavingForm(); }
 };
 
 // ── FORM UTILS ──
@@ -1077,6 +1103,113 @@ if(userName) {
 }
 
 // ── THEME ──
+
+// ── WISHLIST ──
+const WISH_PRIO = [
+  {v:1, label:"⭐⭐⭐ Serius",  css:"p1"},
+  {v:2, label:"⭐⭐ Mungkin",   css:"p2"},
+  {v:3, label:"⭐ Iseng",       css:"p3"},
+];
+
+function renderWishlist() {
+  const arr = Object.entries(wishlist).map(([id,v])=>({id,...v}))
+    .sort((a,b) => (a.done===b.done ? (a.prio||3)-(b.prio||3) : a.done?1:-1));
+  const pending = arr.filter(i=>!i.done);
+  const totalEst = pending.reduce((s,i)=>s+(i.harga||0),0);
+
+  const sumEl = document.getElementById("wishlistSummary");
+  if(pending.length) {
+    const rows = WISH_PRIO.map(p => {
+      const items = pending.filter(i=>(i.prio||3)===p.v);
+      const sub = items.reduce((s,i)=>s+(i.harga||0),0);
+      if(!items.length) return "";
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)">
+        <div style="display:flex;align-items:center;gap:6px">
+          <span class="prio-tag p${p.v}" style="font-size:9px;padding:2px 7px">${p.label}</span>
+          <span style="font-size:11px;color:var(--muted)">${items.length} item</span>
+        </div>
+        <span style="font-size:13px;font-weight:700;color:var(--text)">${sub?formatRp(sub):"—"}</span>
+      </div>`;
+    }).join("");
+    sumEl.innerHTML = `<div class="card" style="margin-bottom:10px;padding:10px 14px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em">Estimasi Total</span>
+        <span style="font-size:11px;color:var(--muted)">${arr.filter(i=>i.done).length}/${arr.length} selesai</span>
+      </div>
+      ${rows}
+      ${totalEst?`<div style="display:flex;justify-content:space-between;align-items:center;padding-top:8px">
+        <span style="font-size:12px;font-weight:700;color:var(--muted)">Total semua</span>
+        <span style="font-family:'Fraunces',serif;font-size:17px;font-weight:700;color:var(--rose)">${formatRp(totalEst)}</span>
+      </div>`:""}
+    </div>`;
+  } else { sumEl.innerHTML = ""; }
+
+  const el = document.getElementById("wishlistItems");
+  if(!arr.length) {
+    el.innerHTML = `<div class="empty-state"><div style="font-size:36px;margin-bottom:10px">⭐</div><div style="font-size:13px;color:var(--muted);line-height:1.6">Belum ada wishlist berdua<br>Tap + untuk tambah</div></div>`;
+    return;
+  }
+  el.innerHTML = arr.map(item => {
+    const p = WISH_PRIO.find(x=>x.v===(item.prio||3))||WISH_PRIO[2];
+    return `<div class="item-card" style="${item.done?"opacity:0.5":""}">
+      <div style="display:flex;align-items:flex-start;gap:10px">
+        <button onclick="toggleWishDone('${item.id}')"
+          style="width:22px;height:22px;border-radius:6px;border:2px solid var(--border2);background:${item.done?"var(--rose)":"none"};color:${item.done?"#fff":"transparent"};cursor:pointer;flex-shrink:0;font-size:12px;margin-top:1px;display:flex;align-items:center;justify-content:center">
+          ${item.done?"✓":""}
+        </button>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:14px;font-weight:700;${item.done?"text-decoration:line-through;color:var(--muted)":""}">${item.nama}</div>
+          <div style="display:flex;flex-wrap:wrap;gap:4px;margin:4px 0">
+            <span class="prio-tag p${p.v}" style="font-size:9px;padding:2px 7px">${p.label}</span>
+            ${item.kat?`<span style="font-size:10px;padding:2px 8px;border-radius:99px;border:1px solid var(--border2);color:var(--muted)">${item.kat}</span>`:""}
+          </div>
+          ${item.harga?`<div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:3px">${formatRp(item.harga)}</div>`:""}
+          ${item.catatan?`<div style="font-size:11px;color:var(--muted);font-style:italic">"${item.catatan}"</div>`:""}
+        </div>
+        <div style="display:flex;gap:4px;flex-shrink:0">
+          <button onclick="editWish('${item.id}')" style="background:none;border:none;cursor:pointer;font-size:14px;opacity:0.45">✏️</button>
+          <button onclick="deleteWish('${item.id}')" style="background:none;border:none;cursor:pointer;font-size:14px;opacity:0.45">🗑️</button>
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+window.toggleWishDone = function(id) {
+  update(ref(db,"wishlist/"+id), {done:!(wishlist[id]?.done||false)});
+};
+window.editWish = function(id) {
+  const w = wishlist[id]; if(!w) return;
+  editWishId = id;
+  document.getElementById("wFormTitle").textContent = "Edit Wishlist";
+  document.getElementById("wNama").value = w.nama||"";
+  document.getElementById("wPrio").value = w.prio||3;
+  document.getElementById("wHarga").value = w.harga||"";
+  document.getElementById("wKat").value = w.kat||"";
+  document.getElementById("wCatatan").value = w.catatan||"";
+  openForm("wishForm");
+};
+window.deleteWish = function(id) {
+  remove(ref(db,"wishlist/"+id));
+  showToast("Dihapus");
+};
+window.submitWish = function() {
+  const nama = document.getElementById("wNama").value.trim();
+  if(!nama) { showToast("Isi nama dulu ya"); return; }
+  const data = {
+    nama,
+    prio: Number(document.getElementById("wPrio").value)||3,
+    harga: Number(document.getElementById("wHarga").value)||0,
+    kat: document.getElementById("wKat").value.trim(),
+    catatan: document.getElementById("wCatatan").value.trim(),
+    done: false, ts: Date.now()
+  };
+  if(editWishId) { update(ref(db,"wishlist/"+editWishId),data); showToast("Diupdate ✓"); }
+  else { push(ref(db,"wishlist"),data); showToast("Ditambahkan ✓"); }
+  editWishId = null;
+  closeForm("wishForm");
+};
+
 window.toggleTheme = function() {
   const html = document.documentElement;
   const isLight = html.getAttribute('data-theme') === 'light';
@@ -1100,5 +1233,26 @@ window.toggleTheme = function() {
   }, 0);
 })();
 </script>
+
+<!-- FORM: WISHLIST -->
+<div class="form-sheet" id="wishForm">
+  <div class="sheet-handle"></div>
+  <div class="sheet-title" id="wFormTitle">Wishlist Baru</div>
+  <div class="fg"><label>Nama</label><input type="text" id="wNama" placeholder="Barang / pengalaman impian..."></div>
+  <div class="fg"><label>Prioritas</label>
+    <select id="wPrio">
+      <option value="1">⭐⭐⭐ Serius — hampir pasti mau</option>
+      <option value="2">⭐⭐ Mungkin — mau tapi bisa dilewatin</option>
+      <option value="3">⭐ Iseng — pengen aja</option>
+    </select>
+  </div>
+  <div class="fg"><label>Estimasi Harga (Rp)</label><input type="number" id="wHarga" placeholder="0"></div>
+  <div class="fg"><label>Kategori</label><input type="text" id="wKat" placeholder="Elektronik, Liburan, Fashion..."></div>
+  <div class="fg"><label>Catatan</label><textarea id="wCatatan" placeholder="Info tambahan, link, alasan..."></textarea></div>
+  <div class="form-actions">
+    <button class="btn btn-primary" onclick="submitWish()">Simpan</button>
+    <button class="btn btn-ghost" onclick="closeForm('wishForm')">Batal</button>
+  </div>
+</div>
 </body>
 </html>
