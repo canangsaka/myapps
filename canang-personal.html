@@ -90,7 +90,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .main{padding:14px 14px 0;max-width:680px;margin:0 auto;}
 
 /* ── CARDS ── */
-.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 15px;transition:background 0.3s,border-color 0.3s;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 15px;transition:background 0.3s,border-color 0.3s,box-shadow 0.3s;}
 .sec-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin:16px 0 8px;}
 
 /* ── STAT GRID ── */
@@ -1039,16 +1039,47 @@ function renderList() {
     .filter(i => i.type === listType)
     .sort((a,b) => (a.done===b.done ? (a.prio||3)-(b.prio||3) : a.done ? 1 : -1));
 
-  // Summary bar
+  // Summary bar with per-priority breakdown
   const total = arr.length;
   const done = arr.filter(i => i.done).length;
-  const totalPrice = arr.filter(i => !i.done).reduce((s,i) => s+(i.price||0), 0);
+  const pending = arr.filter(i => !i.done);
+  const totalPrice = pending.reduce((s,i) => s+(i.price||0), 0);
+  const prios = getPrios(listType);
   const sumEl = document.getElementById("listSummary");
-  sumEl.innerHTML = total ? `<div class="summary-bar">
-    <span class="summary-pill"><span>${done}/${total}</span> selesai</span>
-    ${totalPrice ? `<span class="summary-pill">Est. <span>${rp(totalPrice)}</span></span>` : ""}
-    <span class="summary-pill" style="cursor:pointer;color:var(--red)" onclick="clearDone()">Hapus selesai</span>
-  </div>` : "";
+
+  if(total) {
+    // Per-priority totals
+    const prioRows = prios.map(p => {
+      const items = pending.filter(i => (i.prio||prios.length) === p.v);
+      const subtotal = items.reduce((s,i) => s+(i.price||0), 0);
+      if(!items.length) return "";
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)">
+        <div style="display:flex;align-items:center;gap:6px">
+          <span class="list-tag ${p.css}" style="font-size:9px">${p.label}</span>
+          <span style="font-size:11px;color:var(--text2)">${items.length} item</span>
+        </div>
+        <span style="font-size:13px;font-weight:700;color:var(--text)">${subtotal ? rp(subtotal) : "—"}</span>
+      </div>`;
+    }).join("");
+
+    sumEl.innerHTML = `
+      <div class="card" style="margin-bottom:10px;padding:10px 14px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <span style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.07em">Estimasi Total</span>
+          <span style="display:flex;gap:10px;align-items:center">
+            <span style="font-size:11px;color:var(--text2)">${done}/${total} selesai</span>
+            <span style="font-size:11px;font-weight:700;cursor:pointer;color:var(--red)" onclick="clearDone()">Hapus selesai</span>
+          </span>
+        </div>
+        ${prioRows}
+        ${totalPrice ? `<div style="display:flex;justify-content:space-between;align-items:center;padding-top:8px;margin-top:2px">
+          <span style="font-size:12px;font-weight:700;color:var(--text2)">Total semua</span>
+          <span style="font-family:'Fraunces',serif;font-size:17px;font-weight:700;color:var(--gold)">${rp(totalPrice)}</span>
+        </div>` : ""}
+      </div>`;
+  } else {
+    sumEl.innerHTML = "";
+  }
 
   const el = document.getElementById("listItems");
   if(!arr.length) {
