@@ -604,6 +604,7 @@ window.switchPage = function(page) {
   document.getElementById("pageTitle").textContent = titles[page];
   document.getElementById("headerProgress").style.display = page==="Needs" ? "block" : "none";
   if(page==="Needs") { renderNeeds(); }
+  if(page==="Wishlist") { renderWishlist(); }
   if(page==="Expenses") { populateMonthSel(); renderExpenses(); }
   if(page==="Savings") renderSavings();
 };
