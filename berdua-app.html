@@ -616,7 +616,7 @@ window.openFab = function() {
     document.getElementById("wFormTitle").textContent="Wishlist Baru";
     ["wNama","wHarga","wKat","wCatatan"].forEach(i=>document.getElementById(i).value="");
     document.getElementById("wPrio").value="2";
-    openForm("wishForm");
+    openForm("formWishlist");
   } else if(currentPage==="Savings") { editSavingId=null; openSavingForm(); }
 };
 
@@ -1187,7 +1187,7 @@ window.editWish = function(id) {
   document.getElementById("wHarga").value = w.harga||"";
   document.getElementById("wKat").value = w.kat||"";
   document.getElementById("wCatatan").value = w.catatan||"";
-  openForm("wishForm");
+  openForm("formWishlist");
 };
 window.deleteWish = function(id) {
   remove(ref(db,"wishlist/"+id));
@@ -1207,7 +1207,7 @@ window.submitWish = function() {
   if(editWishId) { update(ref(db,"wishlist/"+editWishId),data); showToast("Diupdate ✓"); }
   else { push(ref(db,"wishlist"),data); showToast("Ditambahkan ✓"); }
   editWishId = null;
-  closeForm("wishForm");
+  closeForm("formWishlist");
 };
 
 window.toggleTheme = function() {
@@ -1235,23 +1235,25 @@ window.toggleTheme = function() {
 </script>
 
 <!-- FORM: WISHLIST -->
-<div class="form-sheet" id="wishForm">
-  <div class="sheet-handle"></div>
-  <div class="sheet-title" id="wFormTitle">Wishlist Baru</div>
-  <div class="fg"><label>Nama</label><input type="text" id="wNama" placeholder="Barang / pengalaman impian..."></div>
-  <div class="fg"><label>Prioritas</label>
-    <select id="wPrio">
-      <option value="1">⭐⭐⭐ Serius — hampir pasti mau</option>
-      <option value="2">⭐⭐ Mungkin — mau tapi bisa dilewatin</option>
-      <option value="3">⭐ Iseng — pengen aja</option>
-    </select>
-  </div>
-  <div class="fg"><label>Estimasi Harga (Rp)</label><input type="number" id="wHarga" placeholder="0"></div>
-  <div class="fg"><label>Kategori</label><input type="text" id="wKat" placeholder="Elektronik, Liburan, Fashion..."></div>
-  <div class="fg"><label>Catatan</label><textarea id="wCatatan" placeholder="Info tambahan, link, alasan..."></textarea></div>
-  <div class="form-actions">
-    <button class="btn btn-primary" onclick="submitWish()">Simpan</button>
-    <button class="btn btn-ghost" onclick="closeForm('wishForm')">Batal</button>
+<div class="form-overlay" id="formWishlist">
+  <div class="form-sheet">
+    <div class="form-handle"></div>
+    <div class="form-title" id="wFormTitle">Wishlist Baru</div>
+    <div class="fg full"><label>Nama</label><input type="text" id="wNama" placeholder="Barang / pengalaman impian..."></div>
+    <div class="fg full"><label>Prioritas</label>
+      <select id="wPrio">
+        <option value="1">⭐⭐⭐ Serius — hampir pasti mau</option>
+        <option value="2">⭐⭐ Mungkin — mau tapi bisa dilewatin</option>
+        <option value="3">⭐ Iseng — pengen aja</option>
+      </select>
+    </div>
+    <div class="fg full"><label>Estimasi Harga (Rp)</label><input type="number" id="wHarga" placeholder="0"></div>
+    <div class="fg full"><label>Kategori</label><input type="text" id="wKat" placeholder="Elektronik, Liburan, Fashion..."></div>
+    <div class="fg full"><label>Catatan</label><textarea id="wCatatan" placeholder="Info tambahan, link, alasan..." rows="3" style="resize:vertical"></textarea></div>
+    <div class="form-actions">
+      <button class="btn btn-save" onclick="submitWish()">Simpan</button>
+      <button class="btn btn-cancel" onclick="closeForm('formWishlist')">Batal</button>
+    </div>
   </div>
 </div>
 </body>
