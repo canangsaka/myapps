@@ -1107,9 +1107,9 @@ if(userName) {
 
 // ── WISHLIST ──
 const WISH_PRIO = [
-  {v:1, label:"⭐⭐⭐ Serius",  css:"p1"},
-  {v:2, label:"⭐⭐ Mungkin",   css:"p2"},
-  {v:3, label:"⭐ Iseng",       css:"p3"},
+  {v:1, label:"⭐⭐⭐ Serius",  colorVar:"--p1", bgVar:"--p1bg"},
+  {v:2, label:"⭐⭐ Mungkin",   colorVar:"--p2", bgVar:"--p2bg"},
+  {v:3, label:"⭐ Iseng",       colorVar:"--p3", bgVar:"--p3bg"},
 ];
 
 function renderWishlist() {
@@ -1124,12 +1124,13 @@ function renderWishlist() {
       const items = pending.filter(i=>(i.prio||3)===p.v);
       const sub = items.reduce((s,i)=>s+(i.harga||0),0);
       if(!items.length) return "";
+      const c = cssVar(p.colorVar), bg = cssVar(p.bgVar);
       return `<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)">
         <div style="display:flex;align-items:center;gap:6px">
-          <span class="prio-tag p${p.v}" style="font-size:9px;padding:2px 7px">${p.label}</span>
+          <span class="tag" style="background:${bg};color:${c};font-size:10px">${p.label}</span>
           <span style="font-size:11px;color:var(--muted)">${items.length} item</span>
         </div>
-        <span style="font-size:13px;font-weight:700;color:var(--text)">${sub?formatRp(sub):"—"}</span>
+        <span style="font-size:13px;font-weight:700;color:var(--text)">${sub?rp(sub):"—"}</span>
       </div>`;
     }).join("");
     sumEl.innerHTML = `<div class="card" style="margin-bottom:10px;padding:10px 14px">
@@ -1140,7 +1141,7 @@ function renderWishlist() {
       ${rows}
       ${totalEst?`<div style="display:flex;justify-content:space-between;align-items:center;padding-top:8px">
         <span style="font-size:12px;font-weight:700;color:var(--muted)">Total semua</span>
-        <span style="font-family:'Fraunces',serif;font-size:17px;font-weight:700;color:var(--rose)">${formatRp(totalEst)}</span>
+        <span style="font-family:'Fraunces',serif;font-size:17px;font-weight:700;color:var(--rose)">${rp(totalEst)}</span>
       </div>`:""}
     </div>`;
   } else { sumEl.innerHTML = ""; }
@@ -1152,6 +1153,7 @@ function renderWishlist() {
   }
   el.innerHTML = arr.map(item => {
     const p = WISH_PRIO.find(x=>x.v===(item.prio||3))||WISH_PRIO[2];
+    const c = cssVar(p.colorVar), bg = cssVar(p.bgVar);
     return `<div class="item-card" style="${item.done?"opacity:0.5":""}">
       <div style="display:flex;align-items:flex-start;gap:10px">
         <button onclick="toggleWishDone('${item.id}')"
@@ -1161,10 +1163,10 @@ function renderWishlist() {
         <div style="flex:1;min-width:0">
           <div style="font-size:14px;font-weight:700;${item.done?"text-decoration:line-through;color:var(--muted)":""}">${item.nama}</div>
           <div style="display:flex;flex-wrap:wrap;gap:4px;margin:4px 0">
-            <span class="prio-tag p${p.v}" style="font-size:9px;padding:2px 7px">${p.label}</span>
-            ${item.kat?`<span style="font-size:10px;padding:2px 8px;border-radius:99px;border:1px solid var(--border2);color:var(--muted)">${item.kat}</span>`:""}
+            <span class="tag" style="background:${bg};color:${c};font-size:10px">${p.label}</span>
+            ${item.kat?`<span class="tag" style="font-size:10px;background:var(--surface2);color:var(--muted)">${item.kat}</span>`:""}
           </div>
-          ${item.harga?`<div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:3px">${formatRp(item.harga)}</div>`:""}
+          ${item.harga?`<div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:3px">${rp(item.harga)}</div>`:""}
           ${item.catatan?`<div style="font-size:11px;color:var(--muted);font-style:italic">"${item.catatan}"</div>`:""}
         </div>
         <div style="display:flex;gap:4px;flex-shrink:0">
@@ -1175,7 +1177,6 @@ function renderWishlist() {
     </div>`;
   }).join("");
 }
-
 window.toggleWishDone = function(id) {
   update(ref(db,"wishlist/"+id), {done:!(wishlist[id]?.done||false)});
 };
